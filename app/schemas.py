@@ -1,11 +1,21 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 
+class TemplateLanguage(BaseModel):
+    code: str = "en_US"
+
+class Template(BaseModel):
+    name: str
+    language: TemplateLanguage
+
 class MessageRequest(BaseModel):
-    """Schema for incoming message requests."""
-    to_number: str = Field(..., description="Recipient's phone number with country code")
-    message: str = Field(..., description="Message content to be sent")
-    message_type: str = Field(default="text", description="Type of message (text, template, etc.)")
+    """
+    Schema for WhatsApp message request
+    """
+    to_number: str
+    message_type: str = "template"  # Default to template type
+    template: Template
+    message: Optional[str] = None  # Keep this for backward compatibility
 
 class MessageResponse(BaseModel):
     """Schema for message response."""

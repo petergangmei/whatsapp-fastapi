@@ -4,7 +4,7 @@ from typing import Optional
 def validate_phone_number(phone_number: str) -> bool:
     """
     Validate phone number format.
-    Expected format: International format with country code (e.g., +1234567890)
+    Accepts numbers with or without + prefix.
     
     Args:
         phone_number: Phone number to validate
@@ -12,7 +12,16 @@ def validate_phone_number(phone_number: str) -> bool:
     Returns:
         bool: True if valid, False otherwise
     """
+    # Remove any whitespace
+    phone_number = phone_number.strip()
+    
+    # Add + prefix if not present
+    if not phone_number.startswith('+'):
+        phone_number = '+' + phone_number
+    
+    # Basic international phone number pattern
     pattern = r'^\+[1-9]\d{1,14}$'
+    
     return bool(re.match(pattern, phone_number))
 
 def validate_message_content(message: str) -> tuple[bool, Optional[str]]:

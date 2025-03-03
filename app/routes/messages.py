@@ -25,7 +25,20 @@ async def send_message(
     api_key: str = Depends(verify_api_key)
 ) -> MessageResponse:
     """
-    Send a WhatsApp message to a specified number.
+    Send a WhatsApp template message.
+    
+    Example request:
+    ```json
+    {
+        "to_number": "919821449581",
+        "template": {
+            "name": "hello_world",
+            "language": {
+                "code": "en_US"
+            }
+        }
+    }
+    ```
     
     Args:
         message: The message request containing recipient and content
@@ -39,11 +52,11 @@ async def send_message(
     """
     try:
         logger.info(f"Received message request for {message.to_number}")
-        result = await send_whatsapp_message(message)
+        response = await send_whatsapp_message(message)
         
         response = MessageResponse(
             success=True,
-            message_id=result.get("messages", [{}])[0].get("id"),
+            message_id=response.get("messages", [{}])[0].get("id"),
             status="sent"
         )
         

@@ -20,7 +20,7 @@ class Settings:
     
     # WhatsApp API Configuration
     WHATSAPP_API_TOKEN: str = os.getenv("WHATSAPP_API_TOKEN", "")
-    PHONE_NUMBER_ID: str = os.getenv("PHONE_NUMBER_ID", "")
+    WHATSAPP_PHONE_NUMBER_ID: str = os.getenv("PHONE_NUMBER_ID", "")  # Reading from PHONE_NUMBER_ID env var
     
     # Security Settings
     API_KEY_NAME: str = "X-API-Key"  # Name of the header for API key
@@ -45,6 +45,12 @@ class Settings:
             logger.warning("API_KEY is empty or not set in environment")
         else:
             logger.debug(f"API_KEY initialized with length: {len(self.API_KEY)}")
+        
+        # Validate WhatsApp configuration
+        if not self.WHATSAPP_API_TOKEN:
+            logger.warning("WHATSAPP_API_TOKEN is not set")
+        if not self.WHATSAPP_PHONE_NUMBER_ID:
+            logger.warning("WHATSAPP_PHONE_NUMBER_ID is not set")
 
 # Create settings instance
 settings = Settings()
@@ -55,3 +61,4 @@ logger.debug(f"Final API Key from settings (first 4 chars): {settings.API_KEY[:4
 logger.debug(f"Final API Key length in settings: {len(settings.API_KEY)}")
 logger.debug(f"Final API Key type in settings: {type(settings.API_KEY)}")
 logger.debug(f"Expected header name: {settings.API_KEY_NAME}")
+logger.debug(f"WhatsApp Phone Number ID: {settings.WHATSAPP_PHONE_NUMBER_ID}")
