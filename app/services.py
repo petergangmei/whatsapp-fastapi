@@ -1,17 +1,31 @@
 import httpx
 from app.config import settings
-from app.schemas import MessageRequest
+from app.schemas import (
+    MessageRequest, 
+    HelloWorldTemplateRequest,
+    OrderConfirmTemplateRequest,
+    AccountCreatedTemplateRequest,
+    TemplateComponent,
+    TemplateParameter
+)
 from app.logger import logger
 from app.utils.validators import validate_phone_number
 from fastapi import HTTPException
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
-async def send_whatsapp_message(message: MessageRequest) -> Dict[str, Any]:
+async def send_whatsapp_message(
+    message: Union[
+        MessageRequest, 
+        HelloWorldTemplateRequest,
+        OrderConfirmTemplateRequest,
+        AccountCreatedTemplateRequest
+    ]
+) -> Dict[str, Any]:
     """
     Send a message using the WhatsApp Business API.
     
     Args:
-        message (MessageRequest): The message request containing recipient and template info
+        message: The message request containing recipient and template info
         
     Returns:
         dict: Response from WhatsApp API
@@ -42,22 +56,57 @@ async def send_whatsapp_message(message: MessageRequest) -> Dict[str, Any]:
         "Content-Type": "application/json"
     }
     
-    # Construct payload for template message
+    # Base payload
     payload = {
         "messaging_product": "whatsapp",
-        "to": phone_number,  # Use formatted number without + prefix
+        "to": phone_number,
         "type": "template",
         "template": {
-            "name": message.template.name,
+            "name": getattr(message, "template_name", None) or message.template.name,
             "language": {
-                "code": message.template.language.code
+                "code": "en_US"
             }
         }
     }
     
+    # Add template-specific components
+    if isinstance(message, OrderConfirmTemplateRequest):
+        # Add both header (PDF) and body components
+        payload["template"]["components"] = [
+            {
+                "type": "header",
+                "parameters": [
+                    {
+                        "type": "document",
+                        "document": {
+                            "link": str(message.pdf_url)
+                        }
+                    }
+                ]
+            },
+            {
+                "type": "body",
+                "parameters": [
+                    {"type": "text", "text": message.card_type},
+                    {"type": "text", "text": message.merchant_name},
+                    {"type": "text", "text": message.document_type}
+                ]
+            }
+        ]
+    elif isinstance(message, AccountCreatedTemplateRequest):
+        payload["template"]["components"] = [{
+            "type": "body",
+            "parameters": [
+                {"type": "text", "text": message.name},
+                {"type": "text", "text": message.verification_type}
+            ]
+        }]
+    elif isinstance(message, MessageRequest) and message.template.components:
+        payload["template"]["components"] = message.template.components
+    
     try:
         logger.info(f"Sending WhatsApp template message to {phone_number}")
-        logger.debug(f"Using template: {message.template.name}")
+        logger.debug(f"Using template: {payload['template']['name']}")
         logger.debug(f"Request payload: {payload}")
         
         async with httpx.AsyncClient() as client:
