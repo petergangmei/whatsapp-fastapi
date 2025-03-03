@@ -22,15 +22,15 @@ class Settings(BaseSettings):
     
     # Security Settings
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
-    ALLOWED_HOSTS: List[str] = ["*"]  # In production, replace with actual hosts
+    ALLOWED_HOSTS: List[str] = ["*"]
     RATE_LIMIT_MAX_REQUESTS: int = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "100"))
     RATE_LIMIT_WINDOW_SECONDS: int = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
     ENFORCE_HTTPS: bool = os.getenv("ENFORCE_HTTPS", "True").lower() == "true"
     
     # CORS Settings
-    CORS_ORIGINS: List[str] = ["*"]  # In production, replace with actual origins
+    CORS_ORIGINS: List[str] = ["*"]
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: List[str] = ["*"]
+    CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     
     # Application Settings
@@ -38,6 +38,7 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
+        env_file = ".env"
 
 # Create global settings object
 settings = Settings()

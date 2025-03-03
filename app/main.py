@@ -4,8 +4,8 @@ from app.routes import messages
 from app.config import settings
 from app.middleware.security import (
     RateLimitMiddleware,
-    HTTPSRedirectMiddleware,
-    SecurityHeadersMiddleware
+    SecurityHeadersMiddleware,
+    HTTPSRedirectMiddleware
 )
 
 # Initialize FastAPI application
@@ -19,13 +19,14 @@ app = FastAPI(
 if settings.ENFORCE_HTTPS:
     app.add_middleware(HTTPSRedirectMiddleware)
 
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Add rate limiting
 app.add_middleware(
     RateLimitMiddleware,
     max_requests=settings.RATE_LIMIT_MAX_REQUESTS,
     window_seconds=settings.RATE_LIMIT_WINDOW_SECONDS
 )
-
-app.add_middleware(SecurityHeadersMiddleware)
 
 # Configure CORS
 app.add_middleware(

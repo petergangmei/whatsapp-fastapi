@@ -1,5 +1,5 @@
 from fastapi import Request, HTTPException, status
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 from typing import Callable, Dict
 import time
