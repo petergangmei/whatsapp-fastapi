@@ -47,10 +47,10 @@ whatsapp_microservice/
 - [x] Return meaningful error messages instead of generic exceptions
 
 ## 6. Security Enhancements
-- [ ] Store sensitive tokens in `.env`
-- [ ] Enforce HTTPS for API calls
-- [ ] Implement rate limiting to prevent abuse
-- [ ] Validate all user inputs to avoid injections
+- [x] Store sensitive tokens in `.env`
+- [x] Enforce HTTPS for API calls
+- [x] Implement rate limiting to prevent abuse
+- [x] Validate all user inputs to avoid injections
 
 ## 7. Deployment Setup
 - [ ] Ensure `requirements.txt` is updated

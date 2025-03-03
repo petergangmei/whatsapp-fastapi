@@ -1,6 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import messages
+from app.config import settings
+from app.middleware.security import (
+    RateLimitMiddleware,
+    HTTPSRedirectMiddleware,
+    SecurityHeadersMiddleware
+)
 
 # Initialize FastAPI application
 app = FastAPI(
@@ -9,13 +15,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Add security middleware
+if settings.ENFORCE_HTTPS:
+    app.add_middleware(HTTPSRedirectMiddleware)
+
+app.add_middleware(
+    RateLimitMiddleware,
+    max_requests=settings.RATE_LIMIT_MAX_REQUESTS,
+    window_seconds=settings.RATE_LIMIT_WINDOW_SECONDS
+)
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+    allow_methods=settings.CORS_ALLOW_METHODS,
+    allow_headers=settings.CORS_ALLOW_HEADERS,
 )
 
 # Include routers
@@ -24,7 +42,13 @@ app.include_router(messages.router, prefix="/api/v1", tags=["messages"])
 # Root endpoint
 @app.get("/")
 async def root():
-    return {"message": "WhatsApp Microservice API", "status": "active"}
+    return {
+        "message": "WhatsApp Microservice API",
+        "status": "active",
+        "version": "1.0.0",
+        "docs_url": "/docs",
+        "redoc_url": "/redoc"
+    }
 
 if __name__ == "__main__":
     import uvicorn
